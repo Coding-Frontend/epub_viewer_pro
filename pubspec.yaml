@@ -1,0 +1,30 @@
+name: epub_viewer_pro
+description: A full-featured EPUB viewer for Flutter with chapter navigation, bookmarks, highlights, notes, annotations, dark/light/sepia themes, multi-language font support, and DRM protection.
+version: 0.0.1
+homepage: https://github.com/KumarLakshmanan/epub_viewer_pro
+repository: https://github.com/KumarLakshmanan/epub_viewer_pro
+issue_tracker: https://github.com/KumarLakshmanan/epub_viewer_pro/issues
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.10.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  get: ^4.7.2
+  get_storage: ^2.1.1
+  epubx: 4.0.0
+  flutter_widget_from_html: ^0.15.2
+  google_fonts: ^6.2.1
+  screen_protector: ^1.4.10
+  path_provider: ^2.1.5
+  http: ^1.5.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
