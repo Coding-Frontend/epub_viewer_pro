@@ -337,7 +337,6 @@ class _HomePageState extends State<HomePage> {
 
   EpubViewerServiceConfig _buildServiceConfig() {
     return EpubViewerServiceConfig(
-      isLoggedIn: false,
       onMessage: (message, type) {
         final color = type == ViewerMessageType.error
             ? Colors.red

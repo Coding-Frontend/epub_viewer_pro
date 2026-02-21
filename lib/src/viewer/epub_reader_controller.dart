@@ -406,9 +406,9 @@ class EpubReaderController extends GetxController {
       if (filePath != null && filePath!.isNotEmpty) {
         _resolvedFilePath = filePath;
       } else if (fileUrl != null && fileUrl!.isNotEmpty) {
-        // Check if URL needs authentication
-        if (fileUrl!.contains('/api/') && serviceConfig.authToken != null) {
-          _resolvedFilePath = await _downloadAuthenticatedFile(fileUrl!);
+        // Check if URL needs authenticated download (headers provided)
+        if (fileUrl!.contains('/api/') && serviceConfig.httpHeaders != null && serviceConfig.httpHeaders!.isNotEmpty) {
+          _resolvedFilePath = await _downloadFileWithHeaders(fileUrl!);
           if (_resolvedFilePath == null) {
             error.value = 'Failed to download EPUB file';
             isLoading.value = false;
@@ -455,14 +455,14 @@ class EpubReaderController extends GetxController {
     }
   }
 
-  /// Download file from authenticated API endpoint with caching
-  Future<String?> _downloadAuthenticatedFile(String url) async {
+  /// Download file from API endpoint with custom HTTP headers and caching
+  Future<String?> _downloadFileWithHeaders(String url) async {
     try {
       loadingProgress.value = 0.0;
 
-      final token = serviceConfig.authToken;
-      if (token == null || token.isEmpty) {
-        throw Exception('Not authenticated. Please login first.');
+      final headers = serviceConfig.httpHeaders;
+      if (headers == null || headers.isEmpty) {
+        throw Exception('HTTP headers not configured for file download.');
       }
 
       final fileIdMatch = RegExp(r'/files/(\d+)/').firstMatch(url);
@@ -489,7 +489,7 @@ class EpubReaderController extends GetxController {
       final client = http.Client();
       try {
         final request = http.Request('GET', Uri.parse(url));
-        request.headers['Authorization'] = 'Bearer $token';
+        request.headers.addAll(headers);
         request.headers['Accept'] = 'application/epub+zip';
 
         final streamedResponse = await client.send(request);
@@ -1050,8 +1050,7 @@ class EpubReaderController extends GetxController {
     try {
       await saveProgress();
 
-      if (serviceConfig.isLoggedIn &&
-          serviceConfig.onSessionEnd != null &&
+      if (serviceConfig.onSessionEnd != null &&
           _bookIdForStorage > 0) {
         await serviceConfig.onSessionEnd!(
           _bookIdForStorage,
@@ -1074,8 +1073,7 @@ class EpubReaderController extends GetxController {
       _storage.write('epub_scroll_$_bookIdForStorage', scrollOffset.value);
       _storage.write('epub_progress_$_bookIdForStorage', progress.value);
 
-      if (serviceConfig.isLoggedIn &&
-          serviceConfig.onProgressSync != null &&
+      if (serviceConfig.onProgressSync != null &&
           _bookIdForStorage > 0) {
         await serviceConfig.onProgressSync!(
           _bookIdForStorage,
@@ -1102,7 +1100,7 @@ class EpubReaderController extends GetxController {
     }
 
     try {
-      if (serviceConfig.isLoggedIn && serviceConfig.onBookmarksLoad != null) {
+      if (serviceConfig.onBookmarksLoad != null) {
         final apiBookmarks =
             await serviceConfig.onBookmarksLoad!(_bookIdForStorage);
         if (apiBookmarks != null) {
@@ -1145,8 +1143,7 @@ class EpubReaderController extends GetxController {
     bookmarks.add(bookmark);
     _saveBookmarksLocally();
 
-    if (serviceConfig.isLoggedIn &&
-        serviceConfig.onBookmarksSync != null &&
+    if (serviceConfig.onBookmarksSync != null &&
         _bookIdForStorage > 0) {
       try {
         await serviceConfig.onBookmarksSync!(
@@ -1695,8 +1692,7 @@ class EpubReaderController extends GetxController {
     if (validBookId <= 0) return;
 
     try {
-      if (serviceConfig.isLoggedIn &&
-          serviceConfig.onAnnotationsLoad != null) {
+      if (serviceConfig.onAnnotationsLoad != null) {
         final response = await serviceConfig.onAnnotationsLoad!(validBookId);
         if (response != null && response['annotations'] != null) {
           final annotationsData = response['annotations'] as List;
@@ -1735,7 +1731,7 @@ class EpubReaderController extends GetxController {
     final validBookId = _bookIdForStorage;
     if (validBookId <= 0) return;
 
-    if (!serviceConfig.isLoggedIn || serviceConfig.onAnnotationsSync == null) {
+    if (serviceConfig.onAnnotationsSync == null) {
       return;
     }
 
