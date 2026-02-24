@@ -73,6 +73,7 @@ class EpubReaderController extends GetxController {
 
   // Settings
   final isDarkMode = false.obs;
+  final isSepiaMode = false.obs;
   final fontSize = 16.0.obs;
   final fontFamily = 'Default'.obs;
   final lineHeight = 1.5.obs;
@@ -950,6 +951,26 @@ class EpubReaderController extends GetxController {
 
   void setDarkMode(bool value) {
     isDarkMode.value = value;
+    if (value) isSepiaMode.value = false;
+    savePreferences();
+  }
+
+  void setSepiaMode(bool value) {
+    isSepiaMode.value = value;
+    if (value) isDarkMode.value = false;
+    savePreferences();
+  }
+
+  /// Cycles through: Light → Dark → Sepia → Light
+  void toggleReadingTheme() {
+    if (isDarkMode.value) {
+      isDarkMode.value = false;
+      isSepiaMode.value = true;
+    } else if (isSepiaMode.value) {
+      isSepiaMode.value = false;
+    } else {
+      isDarkMode.value = true;
+    }
     savePreferences();
   }
 
@@ -990,6 +1011,9 @@ class EpubReaderController extends GetxController {
       if (savedDarkMode != null) isDarkMode.value = savedDarkMode;
     }
 
+    final savedSepiaMode = _storage.read<bool>('epub_sepia_mode');
+    if (savedSepiaMode != null) isSepiaMode.value = savedSepiaMode;
+
     final savedFontSize = _storage.read<double>('epub_font_size');
     if (savedFontSize != null) fontSize.value = savedFontSize;
 
@@ -1014,6 +1038,7 @@ class EpubReaderController extends GetxController {
 
   void savePreferences() {
     _storage.write('epub_dark_mode', isDarkMode.value);
+    _storage.write('epub_sepia_mode', isSepiaMode.value);
     _storage.write('epub_font_size', fontSize.value);
     _storage.write('epub_font_family', fontFamily.value);
     _storage.write('epub_line_height', lineHeight.value);

@@ -320,8 +320,17 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
   Widget build(BuildContext context) {
     return Obx(() {
       final isDark = controller.isDarkMode.value;
-      final bgColor = isDark ? const Color(0xFF1a1a1a) : Colors.white;
-      final textColor = isDark ? Colors.white : Colors.black87;
+      final isSepia = controller.isSepiaMode.value;
+      final bgColor = isDark
+          ? (widget.themeConfig.darkBackgroundColor)
+          : isSepia
+              ? (widget.themeConfig.sepiaBackgroundColor ?? const Color(0xFFF5E6C8))
+              : (widget.themeConfig.lightBackgroundColor);
+      final textColor = isDark
+          ? widget.themeConfig.darkTextColor
+          : isSepia
+              ? const Color(0xFF5C4033)
+              : widget.themeConfig.lightTextColor;
       final isFullscreen = controller.isFullscreen.value;
 
       return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -443,7 +452,14 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
           child: Obx(() {
             final html = controller.currentChapterHtml.value;
             if (html.isEmpty) {
-              return const SizedBox.shrink();
+              return SizedBox(
+                height: constraints.maxHeight,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+              );
             }
 
             final fontSize = controller.fontSize.value;
@@ -546,9 +562,15 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
         return Obx(() {
           final html = controller.currentChapterHtml.value;
           if (html.isEmpty) {
-            return const SizedBox.shrink();
+            return SizedBox(
+              height: constraints.maxHeight,
+              child: Center(
+                child: CircularProgressIndicator(
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+            );
           }
-
           final fontSize = controller.fontSize.value;
           final fontFamily = _getFontFamily(controller.fontFamily.value);
           final lineHeight = controller.lineHeight.value;
@@ -847,8 +869,13 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
   }
 
   Widget _buildTopBar(bool isDark, Color textColor) {
-    final bgColor = isDark ? const Color(0xFF1a1a1a) : Colors.white;
-    final subtitleColor = isDark ? Colors.white60 : Colors.black54;
+    final isSepia = controller.isSepiaMode.value;
+    final bgColor = isDark
+        ? widget.themeConfig.darkBackgroundColor
+        : isSepia
+            ? (widget.themeConfig.sepiaBackgroundColor ?? const Color(0xFFF5E6C8))
+            : widget.themeConfig.lightBackgroundColor;
+    final subtitleColor = isDark ? Colors.white60 : isSepia ? const Color(0xFF8B6957) : Colors.black54;
 
     return Container(
       padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
@@ -906,21 +933,43 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
                 ),
 
                 // Action buttons
+                // Theme toggle (always visible)
+                Obx(() {
+                  final isDark = controller.isDarkMode.value;
+                  final isSepia = controller.isSepiaMode.value;
+                  IconData themeIcon;
+                  if (isDark) {
+                    themeIcon = Icons.wb_sunny_outlined;
+                  } else if (isSepia) {
+                    themeIcon = Icons.dark_mode_outlined;
+                  } else {
+                    themeIcon = Icons.auto_stories_outlined;
+                  }
+                  return IconButton(
+                    icon: Icon(themeIcon, color: textColor),
+                    onPressed: controller.toggleReadingTheme,
+                    tooltip: 'Toggle theme',
+                  );
+                }),
+                if (controller.featureConfig.enableTableOfContents)
                 IconButton(
                   icon: Icon(Icons.list, color: textColor),
                   onPressed: () => _scaffoldKey.currentState?.openDrawer(),
                   tooltip: 'Table of Contents',
                 ),
+                if (controller.featureConfig.enableSearch)
                 IconButton(
                   icon: Icon(Icons.search, color: textColor),
                   onPressed: () => _showSearchSheet(),
                   tooltip: 'Search',
                 ),
+                if (controller.featureConfig.enableBookmarks)
                 IconButton(
                   icon: Icon(Icons.bookmarks_outlined, color: textColor),
                   onPressed: _showBookmarksSheet,
                   tooltip: 'Bookmarks',
                 ),
+                if (controller.featureConfig.enableSettings)
                 IconButton(
                   icon: Icon(Icons.settings_outlined, color: textColor),
                   onPressed: _showSettingsSheet,
@@ -943,10 +992,15 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
   }
 
   Widget _buildBottomBar(bool isDark, Color textColor) {
-    final bgColor = isDark ? const Color(0xFF1a1a1a) : Colors.white;
-    final subtitleColor = isDark ? Colors.white60 : Colors.black54;
+    final isSepia = controller.isSepiaMode.value;
+    final bgColor = isDark
+        ? widget.themeConfig.darkBackgroundColor
+        : isSepia
+            ? (widget.themeConfig.sepiaBackgroundColor ?? const Color(0xFFF5E6C8))
+            : widget.themeConfig.lightBackgroundColor;
+    final subtitleColor = isDark ? Colors.white60 : isSepia ? const Color(0xFF8B6957) : Colors.black54;
     // Use white accent in dark mode for better visibility (matching PDF reader)
-    final accentColor = isDark ? Colors.white : Theme.of(context).primaryColor;
+    final accentColor = isDark ? Colors.white : isSepia ? const Color(0xFF8B4513) : Theme.of(context).primaryColor;
     final disabledColor = isDark ? Colors.white24 : Colors.black26;
 
     final canGoPrev = controller.currentChapterIndex.value > 0;
@@ -1024,61 +1078,69 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
           const SizedBox(height: 4),
 
           // Navigation buttons
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton.icon(
-                  onPressed: canGoPrev ? controller.goToPreviousChapter : null,
-                  icon: Icon(
-                    Icons.chevron_left,
-                    color: canGoPrev ? accentColor : disabledColor,
-                  ),
-                  label: Text(
-                    'Previous',
-                    style: TextStyle(
-                      color: canGoPrev ? accentColor : disabledColor,
-                    ),
-                  ),
-                ),
+          if (controller.featureConfig.enableChapterNavigation ||
+              controller.featureConfig.enableBookmarks)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (controller.featureConfig.enableChapterNavigation)
+                    TextButton.icon(
+                      onPressed:
+                          canGoPrev ? controller.goToPreviousChapter : null,
+                      icon: Icon(
+                        Icons.chevron_left,
+                        color: canGoPrev ? accentColor : disabledColor,
+                      ),
+                      label: Text(
+                        'Previous',
+                        style: TextStyle(
+                          color: canGoPrev ? accentColor : disabledColor,
+                        ),
+                      ),
+                    )
+                  else
+                    const SizedBox.shrink(),
 
-                // Bookmark button
-                IconButton(
-                  onPressed: () {
-                    if (controller.isCurrentPositionBookmarked()) {
-                      // Already bookmarked
-                    } else {
-                      controller.addBookmark();
-                    }
-                  },
-                  icon: Icon(
-                    controller.isCurrentPositionBookmarked()
-                        ? Icons.bookmark
-                        : Icons.bookmark_border,
-                    color: controller.isCurrentPositionBookmarked()
-                        ? accentColor
-                        : textColor,
-                  ),
-                  tooltip: 'Bookmark',
-                ),
-
-                TextButton.icon(
-                  onPressed: canGoNext ? controller.goToNextChapter : null,
-                  icon: Text(
-                    'Next',
-                    style: TextStyle(
-                      color: canGoNext ? accentColor : disabledColor,
+                  // Bookmark button
+                  if (controller.featureConfig.enableBookmarks)
+                    IconButton(
+                      onPressed: () {
+                        if (!controller.isCurrentPositionBookmarked()) {
+                          controller.addBookmark();
+                        }
+                      },
+                      icon: Icon(
+                        controller.isCurrentPositionBookmarked()
+                            ? Icons.bookmark
+                            : Icons.bookmark_border,
+                        color: controller.isCurrentPositionBookmarked()
+                            ? accentColor
+                            : textColor,
+                      ),
+                      tooltip: 'Bookmark',
                     ),
-                  ),
-                  label: Icon(
-                    Icons.chevron_right,
-                    color: canGoNext ? accentColor : disabledColor,
-                  ),
-                ),
-              ],
+
+                  if (controller.featureConfig.enableChapterNavigation)
+                    TextButton.icon(
+                      onPressed: canGoNext ? controller.goToNextChapter : null,
+                      icon: Text(
+                        'Next',
+                        style: TextStyle(
+                          color: canGoNext ? accentColor : disabledColor,
+                        ),
+                      ),
+                      label: Icon(
+                        Icons.chevron_right,
+                        color: canGoNext ? accentColor : disabledColor,
+                      ),
+                    )
+                  else
+                    const SizedBox.shrink(),
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );

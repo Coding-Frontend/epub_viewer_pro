@@ -11,9 +11,22 @@ class EpubSettingsSheet extends GetView<EpubReaderController> {
   Widget build(BuildContext context) {
     return Obx(() {
       final isDark = controller.isDarkMode.value;
-      final bgColor = isDark ? const Color(0xFF1a1a1a) : Colors.white;
-      final textColor = isDark ? Colors.white : Colors.black87;
-      final subtitleColor = isDark ? Colors.white60 : Colors.black54;
+      final isSepia = controller.isSepiaMode.value;
+      final bgColor = isDark
+          ? const Color(0xFF1a1a1a)
+          : isSepia
+              ? const Color(0xFFF5E6C8)
+              : Colors.white;
+      final textColor = isDark
+          ? Colors.white
+          : isSepia
+              ? const Color(0xFF5C4033)
+              : Colors.black87;
+      final subtitleColor = isDark
+          ? Colors.white60
+          : isSepia
+              ? const Color(0xFF8B6957)
+              : Colors.black54;
       final dividerColor = isDark ? Colors.white12 : Colors.black12;
       final primaryColor = Theme.of(context).primaryColor;
 
@@ -214,6 +227,54 @@ class EpubSettingsSheet extends GetView<EpubReaderController> {
 
                       const SizedBox(height: 20),
 
+                      // Reading Theme section
+                      _buildSectionHeader('Reading Theme', textColor),
+
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          children: [
+                            _buildThemeButton(
+                              label: 'Light',
+                              icon: Icons.wb_sunny_outlined,
+                              isSelected: !isDark && !isSepia,
+                              primaryColor: primaryColor,
+                              textColor: textColor,
+                              bgColor: bgColor,
+                              isDark: isDark,
+                              onTap: () {
+                                if (isDark) controller.setDarkMode(false);
+                                if (isSepia) controller.setSepiaMode(false);
+                              },
+                            ),
+                            const SizedBox(width: 8),
+                            _buildThemeButton(
+                              label: 'Dark',
+                              icon: Icons.dark_mode_outlined,
+                              isSelected: isDark,
+                              primaryColor: primaryColor,
+                              textColor: textColor,
+                              bgColor: bgColor,
+                              isDark: isDark,
+                              onTap: () => controller.setDarkMode(true),
+                            ),
+                            const SizedBox(width: 8),
+                            _buildThemeButton(
+                              label: 'Sepia',
+                              icon: Icons.auto_stories_outlined,
+                              isSelected: isSepia,
+                              primaryColor: primaryColor,
+                              textColor: textColor,
+                              bgColor: bgColor,
+                              isDark: isDark,
+                              onTap: () => controller.setSepiaMode(true),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
                       // Display options
                       _buildSectionHeader('Display', textColor),
 
@@ -227,6 +288,7 @@ class EpubSettingsSheet extends GetView<EpubReaderController> {
                           activeTrackColor: primaryColor,
                         ),
                         isDarkMode: isDark,
+                        isSepiaMode: isSepia,
                       ),
 
                       _SettingsTile(
@@ -239,6 +301,7 @@ class EpubSettingsSheet extends GetView<EpubReaderController> {
                           activeTrackColor: primaryColor,
                         ),
                         isDarkMode: isDark,
+                        isSepiaMode: isSepia,
                       ),
 
                       const SizedBox(height: 16),
@@ -267,6 +330,59 @@ class EpubSettingsSheet extends GetView<EpubReaderController> {
       ),
     );
   }
+
+  Widget _buildThemeButton({
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required Color primaryColor,
+    required Color textColor,
+    required Color bgColor,
+    required bool isDark,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? primaryColor.withValues(alpha: 0.15)
+                : isDark
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.black.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected ? primaryColor : Colors.transparent,
+              width: 1.5,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 20,
+                color: isSelected ? primaryColor : textColor.withValues(alpha: 0.7),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight:
+                      isSelected ? FontWeight.w600 : FontWeight.normal,
+                  color: isSelected ? primaryColor : textColor.withValues(alpha: 0.7),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _SettingsTile extends StatelessWidget {
@@ -275,6 +391,7 @@ class _SettingsTile extends StatelessWidget {
   final String subtitle;
   final Widget trailing;
   final bool isDarkMode;
+  final bool isSepiaMode;
 
   const _SettingsTile({
     required this.icon,
@@ -282,13 +399,26 @@ class _SettingsTile extends StatelessWidget {
     required this.subtitle,
     required this.trailing,
     required this.isDarkMode,
+    this.isSepiaMode = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final textColor = isDarkMode ? Colors.white : Colors.black87;
-    final subtitleColor = isDarkMode ? Colors.white60 : Colors.black54;
-    final iconColor = isDarkMode ? Colors.white70 : Colors.black54;
+    final textColor = isDarkMode
+        ? Colors.white
+        : isSepiaMode
+            ? const Color(0xFF5C4033)
+            : Colors.black87;
+    final subtitleColor = isDarkMode
+        ? Colors.white60
+        : isSepiaMode
+            ? const Color(0xFF8B6957)
+            : Colors.black54;
+    final iconColor = isDarkMode
+        ? Colors.white70
+        : isSepiaMode
+            ? const Color(0xFF8B6957)
+            : Colors.black54;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

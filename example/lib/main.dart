@@ -80,7 +80,8 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -290,6 +291,7 @@ class _HomePageState extends State<HomePage> {
                 (v) => setState(() => _enableChapterNavigation = v)),
           ],
         ),
+      ),
       ),
     );
   }
