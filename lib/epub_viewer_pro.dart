@@ -1,4 +1,4 @@
-library epub_viewer_pro;
+library;
 
 // Service configuration
 export 'src/service_config.dart';
