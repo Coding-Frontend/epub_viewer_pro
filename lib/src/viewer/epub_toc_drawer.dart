@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import '../core/reactive.dart';
 import 'epub_reader_controller.dart';
 
 /// Table of Contents drawer for EPUB reader
-class EpubTocDrawer extends GetView<EpubReaderController> {
-  const EpubTocDrawer({super.key});
+class EpubTocDrawer extends StatelessWidget {
+  final EpubReaderController controller;
+  const EpubTocDrawer({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +73,7 @@ class EpubTocDrawer extends GetView<EpubReaderController> {
                     ),
                     IconButton(
                       icon: Icon(Icons.close, color: subtitleColor),
-                      onPressed: () => Get.back(),
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
                 ),
@@ -133,7 +134,7 @@ class EpubTocDrawer extends GetView<EpubReaderController> {
                       primaryColor: primaryColor,
                       onTap: () {
                         controller.goToChapter(index);
-                        Get.back();
+                        Navigator.of(context).pop();
                       },
                     );
                   },

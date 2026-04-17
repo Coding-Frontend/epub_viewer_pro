@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import '../core/reactive.dart';
 import 'epub_reader_controller.dart';
 
 /// Bookmarks bottom sheet for EPUB reader
-class EpubBookmarksSheet extends GetView<EpubReaderController> {
-  const EpubBookmarksSheet({super.key});
+class EpubBookmarksSheet extends StatelessWidget {
+  final EpubReaderController controller;
+  const EpubBookmarksSheet({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +57,7 @@ class EpubBookmarksSheet extends GetView<EpubReaderController> {
                       ),
                       IconButton(
                         icon: Icon(Icons.close, color: subtitleColor),
-                        onPressed: () => Get.back(),
+                        onPressed: () => Navigator.of(context).pop(),
                       ),
                     ],
                   ),
@@ -112,7 +113,7 @@ class EpubBookmarksSheet extends GetView<EpubReaderController> {
                         primaryColor: primaryColor,
                         onTap: (bookmark) {
                           controller.goToBookmark(bookmark);
-                          Get.back();
+                          Navigator.of(context).pop();
                         },
                         onDelete: controller.removeBookmark,
                       ),
@@ -142,7 +143,7 @@ class EpubBookmarksSheet extends GetView<EpubReaderController> {
                           ? null
                           : () {
                               controller.addBookmark();
-                              Get.back();
+                              Navigator.of(context).pop();
                             },
                       icon: Icon(
                         controller.isCurrentPositionBookmarked()

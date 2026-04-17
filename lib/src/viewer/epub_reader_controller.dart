@@ -2,22 +2,21 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
+import '../core/reactive.dart';
+import '../core/storage.dart';
 import 'package:epubx/epubx.dart' as epub;
 import 'package:screen_protector/screen_protector.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
-import 'package:google_fonts/google_fonts.dart';
 import '../service_config.dart';
 import '../viewer_theme_config.dart';
 import '../feature_config.dart';
 import '../annotations/annotation_models.dart';
 import '../annotations/annotation_toolbar.dart';
 
-/// Controller for EPUB Reader using GetX state management
+/// Controller for EPUB Reader
 /// Uses epubx for parsing, flutter_widget_from_html for rendering
-class EpubReaderController extends GetxController {
+class EpubReaderController extends PluginController {
   final String? filePath;
   final String? fileUrl;
   final String title;
@@ -42,7 +41,7 @@ class EpubReaderController extends GetxController {
     this.externalDarkMode,
   });
 
-  final GetStorage _storage = GetStorage();
+  late final PluginStorage _storage;
 
   // EPUB Document
   epub.EpubBook? epubBook;
@@ -112,7 +111,7 @@ class EpubReaderController extends GetxController {
   DateTime? _sessionStartTime;
   Timer? _autoSaveTimer;
   Timer? _controlsHideTimer;
-  Worker? _themeListener;
+  VoidCallback? _themeListener;
 
   // Font families - reactive based on epub language
   final fontFamilies =
@@ -305,39 +304,32 @@ class EpubReaderController extends GetxController {
   // Get TextStyle for a Google Font
   TextStyle getGoogleFontStyle(String fontName,
       {double? fontSize, FontWeight? fontWeight, Color? color}) {
-    try {
-      return GoogleFonts.getFont(
-        fontName,
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        color: color,
-      );
-    } catch (e) {
-      return TextStyle(
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        color: color,
-      );
+    // Use custom font provider if supplied by the host app
+    if (themeConfig.fontStyleProvider != null) {
+      return themeConfig.fontStyleProvider!(fontName,
+          fontSize: fontSize, fontWeight: fontWeight, color: color);
     }
+    // Without a fontStyleProvider, return a plain TextStyle
+    return TextStyle(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+    );
   }
 
-  /// Helper to show a message via serviceConfig or fallback to snackbar
+  /// Helper to show a message via serviceConfig or fallback to debugPrint
   void _showMessage(String message, ViewerMessageType type) {
     if (serviceConfig.onMessage != null) {
       serviceConfig.onMessage!(message, type);
     } else {
-      Get.snackbar(
-        type == ViewerMessageType.error ? 'Error' : 'Info',
-        message,
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 2),
-      );
+      debugPrint('[EpubViewer] ${type.name}: $message');
     }
   }
 
   @override
   void onInit() {
     super.onInit();
+    _storage = serviceConfig.storage ?? PluginStorage.memory();
     annotationController = AnnotationToolbarController();
     _enableScreenProtector();
     _loadPreferences();
@@ -356,7 +348,7 @@ class EpubReaderController extends GetxController {
     _endReadingSession();
     _syncAnnotationsToServer();
     annotationController.dispose();
-    _themeListener?.dispose();
+    _themeListener?.call();
     _autoSaveTimer?.cancel();
     _controlsHideTimer?.cancel();
     _autoScrollTimer?.cancel();

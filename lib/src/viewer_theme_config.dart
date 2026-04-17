@@ -1,5 +1,16 @@
 import 'package:flutter/material.dart';
 
+/// Callback that resolves a font name to a [TextStyle].
+///
+/// Provide this to replace the built-in Google Fonts lookup with your own
+/// font resolution (e.g. bundled assets, system fonts, or a custom CDN).
+typedef FontStyleProvider = TextStyle Function(
+  String fontName, {
+  double? fontSize,
+  FontWeight? fontWeight,
+  Color? color,
+});
+
 /// Theme configuration for the EPUB viewer.
 ///
 /// Allows customizing all colors and styles used throughout the viewer.
@@ -95,6 +106,11 @@ class EpubViewerThemeConfig {
   /// Default padding.
   final double defaultPadding;
 
+  /// Optional custom font style provider.
+  /// When set, replaces the built-in Google Fonts lookup for all font
+  /// rendering. This lets consumers avoid the `google_fonts` dependency.
+  final FontStyleProvider? fontStyleProvider;
+
   const EpubViewerThemeConfig({
     this.primaryColor,
     this.lightBackgroundColor = Colors.white,
@@ -126,6 +142,7 @@ class EpubViewerThemeConfig {
     this.cardBorderRadius = 12.0,
     this.buttonBorderRadius = 8.0,
     this.defaultPadding = 16.0,
+    this.fontStyleProvider,
   });
 
   /// Get background color based on dark mode.

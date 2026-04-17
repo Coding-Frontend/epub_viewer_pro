@@ -1,5 +1,9 @@
 library;
 
+// Core reactive system
+export 'src/core/reactive.dart';
+export 'src/core/storage.dart';
+
 // Service configuration
 export 'src/service_config.dart';
 
@@ -20,3 +24,4 @@ export 'src/viewer/epub_viewer_screen.dart';
 export 'src/viewer/epub_toc_drawer.dart';
 export 'src/viewer/epub_settings_sheet.dart';
 export 'src/viewer/epub_bookmarks_sheet.dart';
+export 'src/viewer/simple_epub_viewer.dart';

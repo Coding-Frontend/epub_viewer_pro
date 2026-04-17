@@ -47,8 +47,7 @@ EpubViewerScreen(
   title: 'My Book',
   bookId: 123,
   serviceConfig: EpubViewerServiceConfig(
-    authToken: 'your-jwt-token',
-    isLoggedIn: true,
+    httpHeaders: {'Authorization': 'Bearer your-jwt-token'},
     onBookmarksSync: (bookId, bookmarks) async { /* sync */ },
     onMessage: (msg, type) { /* show toast */ },
   ),

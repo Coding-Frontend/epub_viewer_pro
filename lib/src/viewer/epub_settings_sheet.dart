@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../core/reactive.dart';
+import '../viewer_theme_config.dart';
 import 'epub_reader_controller.dart';
 
 /// Settings bottom sheet for EPUB reader
-class EpubSettingsSheet extends GetView<EpubReaderController> {
-  const EpubSettingsSheet({super.key});
+class EpubSettingsSheet extends StatelessWidget {
+  final EpubReaderController controller;
+  const EpubSettingsSheet({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +70,7 @@ class EpubSettingsSheet extends GetView<EpubReaderController> {
                     ),
                     IconButton(
                       icon: Icon(Icons.close, color: subtitleColor),
-                      onPressed: () => Get.back(),
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
                 ),
@@ -180,6 +181,7 @@ class EpubSettingsSheet extends GetView<EpubReaderController> {
                               primaryColor: primaryColor,
                               textColor: textColor,
                               onTap: () => controller.setFontFamily(font),
+                              fontStyleProvider: controller.themeConfig.fontStyleProvider,
                             );
                           },
                         ),
@@ -472,6 +474,7 @@ Widget _buildFontTile({
   required Color primaryColor,
   required Color textColor,
   required VoidCallback onTap,
+  TextStyle Function(String fontFamily, {double? fontSize, FontWeight? fontWeight, Color? color})? fontStyleProvider,
 }) {
   return InkWell(
     onTap: onTap,
@@ -498,7 +501,8 @@ Widget _buildFontTile({
           Text(
             'Aa',
             style:
-                _getFontPreviewStyle(font, isSelected, primaryColor, textColor),
+                _getFontPreviewStyle(font, isSelected, primaryColor, textColor,
+                    fontStyleProvider: fontStyleProvider),
           ),
           const SizedBox(height: 2),
           // Font name
@@ -519,9 +523,10 @@ Widget _buildFontTile({
   );
 }
 
-/// Get font preview style using Google Fonts
+/// Get font preview style using Google Fonts or a custom provider
 TextStyle _getFontPreviewStyle(
-    String font, bool isSelected, Color primaryColor, Color textColor) {
+    String font, bool isSelected, Color primaryColor, Color textColor,
+    {FontStyleProvider? fontStyleProvider}) {
   final color = isSelected ? primaryColor : textColor;
   const fontSize = 18.0;
   const fontWeight = FontWeight.w500;
@@ -530,16 +535,13 @@ TextStyle _getFontPreviewStyle(
     return TextStyle(fontSize: fontSize, fontWeight: fontWeight, color: color);
   }
 
-  try {
-    return GoogleFonts.getFont(
-      font,
-      fontSize: fontSize,
-      fontWeight: fontWeight,
-      color: color,
-    );
-  } catch (e) {
-    return TextStyle(fontSize: fontSize, fontWeight: fontWeight, color: color);
+  if (fontStyleProvider != null) {
+    return fontStyleProvider(font,
+        fontSize: fontSize, fontWeight: fontWeight, color: color);
   }
+
+  // Without a fontStyleProvider, return a plain TextStyle
+  return TextStyle(fontSize: fontSize, fontWeight: fontWeight, color: color);
 }
 
 /// Shorten long font names for display

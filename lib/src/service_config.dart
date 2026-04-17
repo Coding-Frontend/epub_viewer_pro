@@ -1,3 +1,5 @@
+import 'core/storage.dart';
+
 /// Message types for viewer notifications
 enum ViewerMessageType {
   success,
@@ -87,6 +89,9 @@ class EpubViewerServiceConfig {
   /// Called to display a message to the user.
   final MessageCallback? onMessage;
 
+  /// Provide a [PluginStorage] backed by shared_preferences, Hive, or similar.
+  final PluginStorage? storage;
+
   const EpubViewerServiceConfig({
     this.httpHeaders,
     this.onBookmarksSync,
@@ -99,6 +104,7 @@ class EpubViewerServiceConfig {
     this.onSessionEnd,
     this.onProgressSync,
     this.onMessage,
+    this.storage,
   });
 
   /// A default config with no server sync (offline only).

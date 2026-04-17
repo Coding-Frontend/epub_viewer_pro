@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
+import '../core/reactive.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import '../service_config.dart';
 import '../viewer_theme_config.dart';
@@ -23,6 +23,7 @@ class EpubViewerScreen extends StatefulWidget {
   final EpubViewerThemeConfig themeConfig;
   final EpubViewerFeatureConfig featureConfig;
   final RxBool? externalDarkMode;
+  final VoidCallback? onClose;
 
   const EpubViewerScreen({
     super.key,
@@ -36,6 +37,7 @@ class EpubViewerScreen extends StatefulWidget {
     this.themeConfig = const EpubViewerThemeConfig(),
     this.featureConfig = const EpubViewerFeatureConfig(),
     this.externalDarkMode,
+    this.onClose,
   });
 
   @override
@@ -67,7 +69,7 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
     _animationController.forward();
 
     // Initialize controller
-    controller = Get.put(EpubReaderController(
+    controller = EpubReaderController(
       filePath: widget.filePath,
       fileUrl: widget.fileUrl,
       title: widget.title,
@@ -78,7 +80,8 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
       themeConfig: widget.themeConfig,
       featureConfig: widget.featureConfig,
       externalDarkMode: widget.externalDarkMode,
-    ));
+    );
+    controller.initialize();
 
     // Listen to scroll position
     _scrollController.addListener(_onScroll);
@@ -96,7 +99,7 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _animationController.dispose();
-    Get.delete<EpubReaderController>();
+    controller.dispose();
     super.dispose();
   }
 
@@ -118,18 +121,20 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
   }
 
   void _showSettingsSheet() {
-    Get.bottomSheet(
-      const EpubSettingsSheet(),
+    showModalBottomSheet(
+      context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      builder: (_) => EpubSettingsSheet(controller: controller),
     );
   }
 
   void _showBookmarksSheet() {
-    Get.bottomSheet(
-      const EpubBookmarksSheet(),
+    showModalBottomSheet(
+      context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      builder: (_) => EpubBookmarksSheet(controller: controller),
     );
   }
 
@@ -141,8 +146,11 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
     final subtitleColor = isDark ? Colors.white60 : Colors.black54;
     final searchController = TextEditingController();
 
-    Get.bottomSheet(
-      Container(
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
         height: MediaQuery.of(context).size.height * 0.7,
         decoration: BoxDecoration(
           color: bgColor,
@@ -258,7 +266,7 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
                       ),
                       onTap: () {
                         controller.goToSearchResult(index);
-                        Get.back();
+                        Navigator.of(context).pop();
                       },
                     );
                   },
@@ -304,8 +312,6 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
           ],
         ),
       ),
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
     ).then((_) {
       controller.exitSearchMode();
     });
@@ -344,7 +350,7 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
         child: Scaffold(
           key: _scaffoldKey,
           backgroundColor: bgColor,
-          drawer: const EpubTocDrawer(),
+          drawer: EpubTocDrawer(controller: controller),
           body: FadeTransition(
             opacity: _fadeAnimation,
             child: Stack(
@@ -721,6 +727,7 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
           color: primaryColor,
           bgColor: bgColor,
           onPressed: () async {
+            final messenger = ScaffoldMessenger.of(context);
             // Copy selection to clipboard first
             selectableRegionState.copySelection(SelectionChangedCause.toolbar);
             // Read from clipboard
@@ -729,14 +736,17 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
             if (selectedText.isNotEmpty) {
               controller.addHighlight(selectedText, 0, selectedText.length);
               selectableRegionState.hideToolbar();
-              Get.snackbar(
-                'Highlighted',
-                'Text has been highlighted',
-                snackPosition: SnackPosition.BOTTOM,
-                duration: const Duration(seconds: 2),
-                backgroundColor: bgColor,
-                colorText: textColor,
-              );
+              try {
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: const Text('Text has been highlighted'),
+                    duration: const Duration(seconds: 2),
+                    backgroundColor: bgColor,
+                  ),
+                );
+              } catch (e) {
+                debugPrint('Snackbar error (no overlay): $e');
+              }
             }
           },
         ),
@@ -799,8 +809,9 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
     final bgColor = isDark ? const Color(0xFF2a2a2a) : Colors.white;
     final noteController = TextEditingController();
 
-    Get.dialog(
-      AlertDialog(
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
         backgroundColor: bgColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
@@ -846,7 +857,7 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
         ),
         actions: [
           TextButton(
-            onPressed: () => Get.back(),
+            onPressed: () => Navigator.of(ctx).pop(),
             child: Text('Cancel',
                 style: TextStyle(color: textColor.withValues(alpha: 0.6))),
           ),
@@ -855,13 +866,13 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
               final noteText = noteController.text.trim();
               if (noteText.isNotEmpty) {
                 // Close dialog first
-                Get.back();
+                Navigator.of(ctx).pop();
                 // Then add note (this shows its own snackbar)
                 controller.addNote(selectedText, noteText);
               }
             },
             child: Text('Save',
-                style: TextStyle(color: Theme.of(Get.context!).primaryColor)),
+                style: TextStyle(color: Theme.of(context).primaryColor)),
           ),
         ],
       ),
@@ -899,7 +910,10 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
                 // Back button
                 IconButton(
                   icon: Icon(Icons.arrow_back, color: textColor),
-                  onPressed: () => Get.back(),
+                  onPressed: () {
+                    widget.onClose?.call();
+                    Navigator.of(context).pop();
+                  },
                 ),
 
                 // Title
@@ -1249,7 +1263,10 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   OutlinedButton.icon(
-                    onPressed: () => Get.back(),
+                    onPressed: () {
+                      widget.onClose?.call();
+                      Navigator.of(context).pop();
+                    },
                     icon: const Icon(Icons.arrow_back),
                     label: const Text('Go Back'),
                   ),
