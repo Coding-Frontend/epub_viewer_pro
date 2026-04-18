@@ -1,5 +1,9 @@
 # epub_viewer_pro
 
+[![pub.dev](https://img.shields.io/pub/v/epub_viewer_pro.svg)](https://pub.dev/packages/epub_viewer_pro)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Publisher](https://img.shields.io/badge/publisher-codingfrontend.in-blue)](https://pub.dev/publishers/codingfrontend.in)
+
 A full-featured EPUB viewer for Flutter with chapter-based navigation, bookmarks, highlights, notes, annotations, dark/light/sepia themes, multi-language Google Fonts support, and DRM protection.
 
 ## Features
