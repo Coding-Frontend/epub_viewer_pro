@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/platform_utils.dart';
 import '../core/reactive.dart';
 import 'epub_reader_controller.dart';
 
@@ -56,7 +57,7 @@ class EpubBookmarksSheet extends StatelessWidget {
                         ),
                       ),
                       IconButton(
-                        icon: Icon(Icons.close, color: subtitleColor),
+                        icon: Icon(ViewerIcons.close, color: subtitleColor),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                     ],
@@ -74,7 +75,7 @@ class EpubBookmarksSheet extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.bookmark, size: 18),
+                          Icon(ViewerIcons.bookmark, size: 18),
                           const SizedBox(width: 4),
                           Text('${controller.bookmarks.length}'),
                         ],
@@ -84,7 +85,7 @@ class EpubBookmarksSheet extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.highlight, size: 18),
+                          Icon(ViewerIcons.highlight, size: 18),
                           const SizedBox(width: 4),
                           Text('${controller.highlights.length}'),
                         ],
@@ -94,7 +95,7 @@ class EpubBookmarksSheet extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.note, size: 18),
+                          Icon(ViewerIcons.note, size: 18),
                           const SizedBox(width: 4),
                           Text('${controller.notes.length}'),
                         ],
@@ -147,7 +148,7 @@ class EpubBookmarksSheet extends StatelessWidget {
                             },
                       icon: Icon(
                         controller.isCurrentPositionBookmarked()
-                            ? Icons.bookmark
+                            ? ViewerIcons.bookmark
                             : Icons.bookmark_add,
                       ),
                       label: Text(
@@ -197,7 +198,7 @@ class _BookmarksTab extends StatelessWidget {
   Widget build(BuildContext context) {
     if (bookmarks.isEmpty) {
       return _buildEmptyState(
-        Icons.bookmark_border,
+        ViewerIcons.bookmarkOutline,
         'No bookmarks yet',
         'Add bookmarks to save your reading position',
       );
@@ -214,7 +215,7 @@ class _BookmarksTab extends StatelessWidget {
       itemBuilder: (context, index) {
         final bookmark = bookmarks[index];
         return _AnnotationItem(
-          icon: Icons.bookmark,
+          icon: ViewerIcons.bookmark,
           title: bookmark.chapterTitle,
           subtitle: 'Chapter ${bookmark.chapterIndex + 1}',
           timestamp: bookmark.createdAt,
@@ -274,7 +275,7 @@ class _HighlightsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     if (highlights.isEmpty) {
       return _buildEmptyState(
-        Icons.highlight,
+        ViewerIcons.highlight,
         'No highlights yet',
         'Select text to add highlights',
       );
@@ -291,7 +292,7 @@ class _HighlightsTab extends StatelessWidget {
       itemBuilder: (context, index) {
         final highlight = highlights[index];
         return _AnnotationItem(
-          icon: Icons.highlight,
+          icon: ViewerIcons.highlight,
           title: highlight.text,
           subtitle: 'Chapter ${highlight.chapterIndex + 1}',
           timestamp: highlight.createdAt,
@@ -351,7 +352,7 @@ class _NotesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     if (notes.isEmpty) {
       return _buildEmptyState(
-        Icons.note,
+        ViewerIcons.note,
         'No notes yet',
         'Add notes to remember important passages',
       );
@@ -460,7 +461,7 @@ class _AnnotationItem extends StatelessWidget {
         style: TextStyle(fontSize: 12, color: subtitleColor),
       ),
       trailing: IconButton(
-        icon: const Icon(Icons.delete_outline),
+        icon: Icon(ViewerIcons.delete),
         color: subtitleColor,
         iconSize: 20,
         onPressed: onDelete,
@@ -531,7 +532,7 @@ class _NoteItem extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.delete_outline),
+                icon: Icon(ViewerIcons.delete),
                 color: subtitleColor,
                 iconSize: 18,
                 onPressed: onDelete,

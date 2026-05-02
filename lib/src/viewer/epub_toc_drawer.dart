@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/platform_utils.dart';
 import '../core/reactive.dart';
 import 'epub_reader_controller.dart';
 
@@ -43,7 +44,7 @@ class EpubTocDrawer extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
-                        Icons.list,
+                        ViewerIcons.list,
                         color: primaryColor,
                         size: 24,
                       ),
@@ -72,7 +73,7 @@ class EpubTocDrawer extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.close, color: subtitleColor),
+                      icon: Icon(ViewerIcons.close, color: subtitleColor),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],

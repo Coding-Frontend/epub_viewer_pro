@@ -1,3 +1,13 @@
+## 0.0.2
+
+* Added iOS platform support (Android & iOS)
+* Improved example app showcasing all 19 feature toggles
+* Added Quick Presets: Full Features, Minimal, Read-Only
+* Added Book ID input, language selector, Sample Preview mode toggle
+* Added theme customization: primary color, light/dark/sepia backgrounds, card radius
+* Added Service Config tab: HTTP headers, server sync callback documentation
+* Fixed: `DropdownButtonFormField` deprecated `value` → `initialValue`
+
 ## 0.0.1
 
 * Initial release

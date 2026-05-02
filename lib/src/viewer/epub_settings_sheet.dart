@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/platform_utils.dart';
 import '../core/reactive.dart';
 import '../viewer_theme_config.dart';
 import 'epub_reader_controller.dart';
@@ -69,7 +70,7 @@ class EpubSettingsSheet extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.close, color: subtitleColor),
+                      icon: Icon(ViewerIcons.close, color: subtitleColor),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
@@ -94,7 +95,7 @@ class EpubSettingsSheet extends StatelessWidget {
                           children: [
                             IconButton(
                               onPressed: controller.decreaseFontSize,
-                              icon: Icon(Icons.text_decrease, color: textColor),
+                              icon: Icon(ViewerIcons.textDecrease, color: textColor),
                               style: IconButton.styleFrom(
                                 backgroundColor: isDark
                                     ? Colors.white.withValues(alpha: 0.1)
@@ -124,7 +125,7 @@ class EpubSettingsSheet extends StatelessWidget {
                             ),
                             IconButton(
                               onPressed: controller.increaseFontSize,
-                              icon: Icon(Icons.text_increase, color: textColor),
+                              icon: Icon(ViewerIcons.textIncrease, color: textColor),
                               style: IconButton.styleFrom(
                                 backgroundColor: isDark
                                     ? Colors.white.withValues(alpha: 0.1)
@@ -238,7 +239,7 @@ class EpubSettingsSheet extends StatelessWidget {
                           children: [
                             _buildThemeButton(
                               label: 'Light',
-                              icon: Icons.wb_sunny_outlined,
+                              icon: ViewerIcons.sunOutlined,
                               isSelected: !isDark && !isSepia,
                               primaryColor: primaryColor,
                               textColor: textColor,
@@ -252,7 +253,7 @@ class EpubSettingsSheet extends StatelessWidget {
                             const SizedBox(width: 8),
                             _buildThemeButton(
                               label: 'Dark',
-                              icon: Icons.dark_mode_outlined,
+                              icon: ViewerIcons.darkMode,
                               isSelected: isDark,
                               primaryColor: primaryColor,
                               textColor: textColor,
@@ -263,7 +264,7 @@ class EpubSettingsSheet extends StatelessWidget {
                             const SizedBox(width: 8),
                             _buildThemeButton(
                               label: 'Sepia',
-                              icon: Icons.auto_stories_outlined,
+                              icon: ViewerIcons.sepia,
                               isSelected: isSepia,
                               primaryColor: primaryColor,
                               textColor: textColor,
@@ -281,10 +282,10 @@ class EpubSettingsSheet extends StatelessWidget {
                       _buildSectionHeader('Display', textColor),
 
                       _SettingsTile(
-                        icon: Icons.fullscreen,
+                        icon: ViewerIcons.fullscreen,
                         title: 'Fullscreen Mode',
                         subtitle: 'Hide system bars while reading',
-                        trailing: Switch(
+                        trailing: Switch.adaptive(
                           value: controller.isFullscreen.value,
                           onChanged: (_) => controller.toggleFullscreen(),
                           activeTrackColor: primaryColor,
@@ -294,10 +295,10 @@ class EpubSettingsSheet extends StatelessWidget {
                       ),
 
                       _SettingsTile(
-                        icon: Icons.screen_lock_portrait,
+                        icon: ViewerIcons.screenLock,
                         title: 'Keep Screen On',
                         subtitle: 'Prevent screen from sleeping',
-                        trailing: Switch(
+                        trailing: Switch.adaptive(
                           value: controller.keepScreenOn.value,
                           onChanged: (_) => controller.toggleKeepScreenOn(),
                           activeTrackColor: primaryColor,

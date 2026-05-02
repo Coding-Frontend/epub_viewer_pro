@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/platform_utils.dart';
 import 'package:flutter/services.dart';
 import '../core/reactive.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
@@ -174,13 +175,14 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
               child: TextField(
                 controller: searchController,
                 autofocus: true,
+                keyboardAppearance: iosKeyboardBrightness(context),
                 style: TextStyle(color: textColor),
                 decoration: InputDecoration(
                   hintText: 'Search in book...',
                   hintStyle: TextStyle(color: subtitleColor),
-                  prefixIcon: Icon(Icons.search, color: subtitleColor),
+                  prefixIcon: Icon(ViewerIcons.search, color: subtitleColor),
                   suffixIcon: IconButton(
-                    icon: Icon(Icons.close, color: subtitleColor),
+                    icon: Icon(ViewerIcons.close, color: subtitleColor),
                     onPressed: () {
                       searchController.clear();
                       controller.performSearch('');
@@ -290,7 +292,7 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
                   children: [
                     TextButton.icon(
                       onPressed: controller.previousSearchResult,
-                      icon: const Icon(Icons.chevron_left),
+                      icon: Icon(ViewerIcons.chevronLeft),
                       label: const Text('Previous'),
                     ),
                     Text(
@@ -303,7 +305,7 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
                     TextButton.icon(
                       onPressed: controller.nextSearchResult,
                       icon: const Text('Next'),
-                      label: const Icon(Icons.chevron_right),
+                      label: Icon(ViewerIcons.chevronRight),
                     ),
                   ],
                 ),
@@ -442,7 +444,7 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
           ],
         ),
         child: Icon(
-          isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+          isBookmarked ? ViewerIcons.bookmark : ViewerIcons.bookmarkOutline,
           color: isBookmarked ? accentColor : textColor.withValues(alpha: 0.7),
           size: 20,
         ),
@@ -671,7 +673,7 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
         ),
         child: IconButton(
           icon: Icon(
-            Icons.fullscreen_exit,
+            ViewerIcons.fullscreenExit,
             color: isDark ? Colors.white : Colors.black87,
           ),
           onPressed: _toggleFullscreen,
@@ -712,7 +714,7 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
       children: [
         // Copy button
         _buildSelectionButton(
-          icon: Icons.copy,
+          icon: ViewerIcons.copy,
           label: 'Copy',
           color: textColor,
           bgColor: bgColor,
@@ -722,7 +724,7 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
         ),
         // Highlight button - uses clipboard for selected text
         _buildSelectionButton(
-          icon: Icons.highlight,
+          icon: ViewerIcons.highlight,
           label: 'Highlight',
           color: primaryColor,
           bgColor: bgColor,
@@ -752,7 +754,7 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
         ),
         // Note button
         _buildSelectionButton(
-          icon: Icons.note_add,
+          icon: ViewerIcons.note,
           label: 'Note',
           color: primaryColor,
           bgColor: bgColor,
@@ -844,6 +846,7 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
             TextField(
               controller: noteController,
               autofocus: true,
+              keyboardAppearance: iosKeyboardBrightness(context),
               maxLines: 4,
               style: TextStyle(color: textColor),
               decoration: InputDecoration(
@@ -909,7 +912,7 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
               children: [
                 // Back button
                 IconButton(
-                  icon: Icon(Icons.arrow_back, color: textColor),
+                  icon: Icon(ViewerIcons.back, color: textColor),
                   onPressed: () {
                     widget.onClose?.call();
                     Navigator.of(context).pop();
@@ -953,11 +956,11 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
                   final isSepia = controller.isSepiaMode.value;
                   IconData themeIcon;
                   if (isDark) {
-                    themeIcon = Icons.wb_sunny_outlined;
+                    themeIcon = ViewerIcons.sunOutlined;
                   } else if (isSepia) {
-                    themeIcon = Icons.dark_mode_outlined;
+                    themeIcon = ViewerIcons.darkMode;
                   } else {
-                    themeIcon = Icons.auto_stories_outlined;
+                    themeIcon = ViewerIcons.sepia;
                   }
                   return IconButton(
                     icon: Icon(themeIcon, color: textColor),
@@ -967,25 +970,25 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
                 }),
                 if (controller.featureConfig.enableTableOfContents)
                 IconButton(
-                  icon: Icon(Icons.list, color: textColor),
+                  icon: Icon(ViewerIcons.list, color: textColor),
                   onPressed: () => _scaffoldKey.currentState?.openDrawer(),
                   tooltip: 'Table of Contents',
                 ),
                 if (controller.featureConfig.enableSearch)
                 IconButton(
-                  icon: Icon(Icons.search, color: textColor),
+                  icon: Icon(ViewerIcons.search, color: textColor),
                   onPressed: () => _showSearchSheet(),
                   tooltip: 'Search',
                 ),
                 if (controller.featureConfig.enableBookmarks)
                 IconButton(
-                  icon: Icon(Icons.bookmarks_outlined, color: textColor),
+                  icon: Icon(ViewerIcons.bookmark, color: textColor),
                   onPressed: _showBookmarksSheet,
                   tooltip: 'Bookmarks',
                 ),
                 if (controller.featureConfig.enableSettings)
                 IconButton(
-                  icon: Icon(Icons.settings_outlined, color: textColor),
+                  icon: Icon(ViewerIcons.settings, color: textColor),
                   onPressed: _showSettingsSheet,
                   tooltip: 'Settings',
                 ),
@@ -1104,7 +1107,7 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
                       onPressed:
                           canGoPrev ? controller.goToPreviousChapter : null,
                       icon: Icon(
-                        Icons.chevron_left,
+                        ViewerIcons.chevronLeft,
                         color: canGoPrev ? accentColor : disabledColor,
                       ),
                       label: Text(
@@ -1127,8 +1130,8 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
                       },
                       icon: Icon(
                         controller.isCurrentPositionBookmarked()
-                            ? Icons.bookmark
-                            : Icons.bookmark_border,
+                            ? ViewerIcons.bookmark
+                            : ViewerIcons.bookmarkOutline,
                         color: controller.isCurrentPositionBookmarked()
                             ? accentColor
                             : textColor,
@@ -1146,7 +1149,7 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
                         ),
                       ),
                       label: Icon(
-                        Icons.chevron_right,
+                        ViewerIcons.chevronRight,
                         color: canGoNext ? accentColor : disabledColor,
                       ),
                     )
@@ -1190,7 +1193,7 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            Icons.download,
+                            ViewerIcons.download,
                             size: 24,
                             color: primaryColor,
                           ),
@@ -1236,7 +1239,7 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.error_outline,
+                ViewerIcons.error,
                 size: 64,
                 color: Colors.red[400],
               ),
@@ -1267,13 +1270,13 @@ class _EpubViewerScreenState extends State<EpubViewerScreen>
                       widget.onClose?.call();
                       Navigator.of(context).pop();
                     },
-                    icon: const Icon(Icons.arrow_back),
+                    icon: Icon(ViewerIcons.back),
                     label: const Text('Go Back'),
                   ),
                   const SizedBox(width: 16),
                   ElevatedButton.icon(
                     onPressed: () => controller.loadEpub(),
-                    icon: const Icon(Icons.refresh),
+                    icon: Icon(ViewerIcons.refresh),
                     label: const Text('Retry'),
                   ),
                 ],

@@ -1,4 +1,5 @@
 import 'dart:io';
+import '../core/platform_utils.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:epubx/epubx.dart' as epub;
@@ -140,7 +141,7 @@ class _SimpleEpubViewerState extends State<SimpleEpubViewer> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
+              Icon(ViewerIcons.error, size: 48, color: Colors.red[300]),
               const SizedBox(height: 16),
               Text('Failed to load EPUB',
                   style: TextStyle(color: textColor, fontSize: 16)),
@@ -204,7 +205,7 @@ class _SimpleEpubViewerState extends State<SimpleEpubViewer> {
                     onPressed: _currentChapterIndex > 0
                         ? () => setState(() => _currentChapterIndex--)
                         : null,
-                    icon: const Icon(Icons.chevron_left),
+                    icon: Icon(ViewerIcons.chevronLeft),
                     label: const Text('Previous'),
                   ),
                   Text(
@@ -215,7 +216,7 @@ class _SimpleEpubViewerState extends State<SimpleEpubViewer> {
                     onPressed: _currentChapterIndex < _chapters.length - 1
                         ? () => setState(() => _currentChapterIndex++)
                         : null,
-                    icon: const Icon(Icons.chevron_right),
+                    icon: Icon(ViewerIcons.chevronRight),
                     label: const Text('Next'),
                   ),
                 ],

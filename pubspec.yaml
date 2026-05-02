@@ -1,9 +1,10 @@
 name: epub_viewer_pro
 description: |
-  A full-featured Flutter EPUB viewer with chapter navigation, bookmarks, highlights,
-  notes, dark/light/sepia themes, 25+ language fonts, DRM protection, and optional
-  server-sync callbacks. Built on epubx and flutter_widget_from_html.
-version: 0.0.1
+  A full-featured Flutter EPUB viewer for Android and iOS. Supports chapter
+  navigation, bookmarks, highlights, notes, dark/light/sepia themes, 25+ language
+  fonts, DRM protection, and optional server-sync callbacks.
+  Built on epubx and flutter_widget_from_html.
+version: 0.0.2
 homepage: https://codingfrontend.in
 repository: https://github.com/Coding-Frontend/epub_viewer_pro
 issue_tracker: https://github.com/Coding-Frontend/epub_viewer_pro/issues
@@ -14,6 +15,10 @@ topics:
   - drm
   - annotations
   - flutter
+
+platforms:
+  android:
+  ios:
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
